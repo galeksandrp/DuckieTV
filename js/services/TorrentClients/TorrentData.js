@@ -89,7 +89,6 @@ TorrentData.prototype.isStarted = function() {
 }
 
 
-
 /**
  * Client implementations
  */
