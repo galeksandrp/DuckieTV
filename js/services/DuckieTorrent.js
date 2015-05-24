@@ -16,19 +16,21 @@ DuckieTorrent.provider('DuckieTorrent', function() {
                 console.info("Registering torrent client: " + name);
                 clients[name] = client;
             },
+
             getClient: function() {
                 return clients[localStorage.getItem('torrenting.client')];
             },
+
             getClientName: function() {
                 return localStorage.getItem('torrenting.client');
             }
-        }
+        };
     };
 })
 
 .run(function() {
     if (!localStorage.getItem('torrenting.client')) {
-        localStorage.setItem('torrenting.client', 'uTorrent')
+        localStorage.setItem('torrenting.client', 'uTorrent');
     }
 })
 
@@ -76,7 +78,7 @@ DuckieTorrent.provider('DuckieTorrent', function() {
         };
 
     };
-})
+});
 
 String.capitalize = function(s) {
     return s.charAt(0).toUpperCase() + s.slice(1);

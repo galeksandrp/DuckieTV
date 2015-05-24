@@ -360,4 +360,4 @@ DuckieTorrent
         DuckieTorrent.register('Vuze', Vuze);
 
     }
-])
+]);
