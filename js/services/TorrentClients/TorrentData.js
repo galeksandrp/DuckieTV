@@ -21,6 +21,10 @@ function TorrentData(data) {
     this.update(data);
 }
 
+TorrentData.prototype.getClient = function() {
+    return angular.element(document.body).injector().get('DuckieTorrent').getClient();
+};
+
 /**
  * Round a number with Math.floor so that we don't lose precision on 99.7%
  */
@@ -138,44 +142,11 @@ qBittorrentData.extends(TorrentData, {
 });
 
 
-
-/**
- * Transmission
- */
-TransmissionData = function(data) {
-    this.update(data);
-};
-
-TransmissionData.extends(TorrentData, {
-    getName: function() {
-        return this.name;
-    },
-
-    getProgress: function() {
-        return this.round(this.percentDone * 100, 1);
-    },
-
-    start: function() {
-        DuckieTorrent.getClient().execute('torrent-start', this.id);
-    },
-
-    stop: function() {
-        DuckieTorrent.getClient().execute('torrent-stop', this.id);
-    },
-    pause: function() {
-        this.stop();
-    },
-
-    isStarted: function() {
-        return this.status > 0;
-    }
-});
-
 /**
  * Vuze - Exact same api as Transmission.
- */
+ *
 var VuzeData = function(data) {
     this.update(data);
 };
 
-VuzeData.extends(TransmissionData);
+VuzeData.extends(TransmissionData); */

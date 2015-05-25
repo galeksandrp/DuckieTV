@@ -1,354 +1,171 @@
+/**
+ * Transmission
+ */
+TransmissionData = function(data) {
+    this.update(data);
+};
+
+TransmissionData.extends(TorrentData, {
+    getName: function() {
+        return this.name;
+    },
+
+    getProgress: function() {
+        return this.round(this.percentDone * 100, 1);
+    },
+
+    start: function() {
+        this.getClient().execute('torrent-start', this.id);
+    },
+
+    stop: function() {
+        this.getClient().execute('torrent-stop', this.id);
+    },
+
+    pause: function() {
+        this.stop();
+    },
+
+    isStarted: function() {
+        return this.status > 0;
+    }
+});
+
 DuckieTorrent
 
-.controller("tbtCtrl", ["Transmission", "SettingsService", "$filter",
-    function(Transmission, SettingsService, $filter) {
 
-        this.model = {
-            server: SettingsService.get('transmission.server'),
-            port: SettingsService.get('transmission.port'),
-            use_auth: SettingsService.get('transmission.use_auth'),
-            username: SettingsService.get('transmission.username'),
-            password: SettingsService.get('transmission.password')
-        };
+.factory('TransmissionAPI', ['BaseHTTPApi', '$http',
+    function(BaseHTTPApi, $http) {
 
-        this.isConnected = function() {
-            return Transmission.isConnected();
-        }
+        var TransmissionAPI = function() {
+            this.sessionID = null;
 
-        this.fields = [{
-                key: "server",
-                type: "input",
-                templateOptions: {
-                    label: "Transmission " + $filter('translate')('TRANSMISSIONjs/address/lbl'),
-                    type: "url",
+            var self = this;
+
+            function rpc(method, params, options) {
+                var
+                    request = {
+                        'method': method
+                    };
+                for (var i in params) {
+                    request[i] = params[i];
                 }
-            }, {
-                key: "port",
-                type: "input",
-                templateOptions: {
-                    label: $filter('translate')('TRANSMISSIONjs/port/lbl'),
-                    type: "number",
-                }
-            }, {
-                key: "use_auth",
-                type: "input",
-                templateOptions: {
-                    type: "checkbox",
-                    label: $filter('translate')('TRANSMISSIONjs/authentication/lbl')
-                }
-            }, {
-                key: "username",
-                type: "input",
-                templateOptions: {
-                    label: $filter('translate')('TRANSMISSIONjs/username/lbl')
-                }
-            }, {
-                key: "password",
-                type: "input",
-                templateOptions: {
-                    label: $filter('translate')('TRANSMISSIONjs/password/lbl'),
-                    type: "password"
-                }
-            },
 
-        ];
-
-        this.test = function() {
-            //console.log("Testing settings");
-            Transmission.Disconnect();
-            Transmission.setConfig(this.model);
-            Transmission.connect().then(function(connected) {
-                console.info("Transmission connected! (save settings)", connected);
-                Transmission.saveConfig();
-            }, function(error) {
-                console.error("Transmission connect error!", error);
-            })
-        }
-    }
-])
-
-.factory('Transmission', ["$q", "$http", "TransmissionRemote", "SettingsService",
-    function($q, $http, TransmissionRemote, SettingsService) {
-        var self = this;
-
-        this.config = {
-            server: SettingsService.get('transmission.server'),
-            port: SettingsService.get('transmission.port'),
-            use_auth: SettingsService.get('transmission.use_auth'),
-            username: SettingsService.get('transmission.username'),
-            password: SettingsService.get('transmission.password')
-        };
-
-        this.sessionID = null;
-
-        /** 
-         * Predefined endpoints for API actions.
-         */
-        this.endpoints = {
-            rpc: '/transmission/rpc'
-        };
-
-        /**
-         * If a specialized parser is needed for a response than it can be automatically picked up by adding the type and a parser
-         * function here.
-         */
-        this.parsers = {
-
-        };
-
-
-        /**
-         * Automated parser for responses for usage when neccesary
-         */
-        this.getParser = function(type) {
-            return (type in this.parsers) ? this.parsers[type] : function(data) {
-                return data.data;
-            };
-        };
-
-        /**
-         * Fetches the url, auto-replaces the port in the url if it was found.
-         */
-        this.getUrl = function(type, param) {
-            var url = this.config.server + ':' + this.config.port + this.endpoints[type];
-            return url.replace('%s', encodeURIComponent(param));
-        };
-
-        this.isPolling = false;
-        this.isConnecting = false;
-        this.connected = false;
-        this.initialized = false;
-
-        /**
-         * Build a JSON request using the URLBuilder service.
-         * @param string type url to fetch from the request types
-         * @param object params GET parameters
-         * @param object options $http optional options
-         */
-        var rpc = function(method, params, options) {
-            var request = {
-                'method': method
-            };
-            for (var i in params) {
-                request[i] = params[i];
-            }
-
-            function handleError(e, f) {
-                if (e.status === 409) {
-                    self.sessionID = e.headers('X-Transmission-Session-Id')
-                    return rpc(method, request, options);
-                }
-            }
-
-            var headers = {
-                'X-Transmission-Session-Id': self.sessionID
-            };
-
-            if (self.config.use_auth) {
-                headers.Authorization = 'Basic ' + Base64.encode(self.config.username + ':' + self.config.password);
-            }
-
-            return $http.post(self.getUrl('rpc'), request, {
-                headers: headers
-            }).then(function(response) {
-                return response.data;
-            }, handleError);
-        };
-
-        var self = this;
-
-        var methods = {
-
-            setConfig: function(config) {
-                self.config = config;
-            },
-
-            saveConfig: function() {
-                Object.keys(self.config).map(function(key) {
-                    SettingsService.set("transmission." + key, self.config[key]);
-                });
-            },
-
-            connect: function() {
-                return rpc('session-get').then(function(result) {
-                    console.log("Transmission check result: ", result);
-                    self.connected = result !== undefined;
-                    if (!self.connected) {
-                        throw "Transmission: Not connected.";
+                function handleError(e, f) {
+                    self.sessionID = e.headers('X-Transmission-Session-Id');
+                    if (e.status === 409) {
+                        return rpc(method, request, options);
                     }
-                })
-            },
+                }
 
-            /** 
-             * Execute and handle the api's 'update' query.
-             * Parses out the events, updates, properties and methods and dispatches them to the TorrentRemote interface
-             * for storage, handling and attaching RPC methods.
-             */
-            statusQuery: function() {
+                var headers = {
+                'X-Transmission-Session-Id': self.sessionID
+                };
+
+                if (self.config.use_auth) {
+                    headers.Authorization = 'Basic ' + Base64.encode(self.config.username + ':' + self.config.password);
+                }
+
+                return $http.post(self.getUrl('rpc'), request, {
+                    headers: headers
+                }).then(function(response) {
+                    return response.data;
+                }, handleError);
+            }
+
+            this.portscan = function() {
+                return rpc('session-get').then(function(result) {
+                    return result !== undefined;
+                });
+            };
+
+            this.getTorrents = function() {
                 return rpc('torrent-get', {
                     arguments: {
                         "fields": ["id", "name", "hashString", "status", "error", "errorString", "eta", "isFinished", "isStalled", "leftUntilDone", "metadataPercentComplete", "percentDone", "sizeWhenDone", "files"]
                     }
                 }).then(function(data) {
-                        if (!data) throw "No response. Client not active?";
-                        data.arguments.torrents.map(function(el) {
-                            el.hash = el.hashString.toUpperCase();
-                            TransmissionRemote.handleEvent(el);
-                        });
-                        return data;
-                    },
-
-                    function(error) {
-                        console.error("Error executing get status query!", error);
+                    return data.arguments.torrents.map(function(el) {
+                        el.hash = el.hashString.toUpperCase();
+                        return el;
                     });
-            },
-            /**
-             * Return the interface that handles the remote data.
-             */
-            getRemote: function() {
-                return TransmissionRemote;
-            },
-
-
-            /**
-             * Connect with an auth token obtained by the Pair function.
-             * Store the resulting session key in $scope.session
-             * You can call this method as often as you want. It'll return a promise that holds
-             * off on resolving until the client is connected.
-             * If it's connected and initialized, a promise will return that immediately resolves with the remote interface.
-             */
-            AutoConnect: function() {
-                if (!self.isConnecting && !self.connected) {
-                    self.connectPromise = $q.defer();
-                    self.isConnecting = true;
-                } else {
-                    return (!self.connected || !self.initialized) ? self.connectPromise.promise : $q(function(resolve) {
-                        resolve(methods.getRemote());
-                    });
-                }
-
-                methods.connect().then(function(result) {
-                    if (!self.isPolling) {
-                        self.isPolling = true;
-                        methods.Update();
-                    }
-                    self.connectPromise.resolve(methods.getRemote());
-
                 });
-                return self.connectPromise.promise;
-            },
+            };
 
-
-            togglePolling: function() {
-                self.isPolling = !self.isPolling;
-                self.Update();
-            },
-            /**
-             * Start the status update polling.
-             * Stores the resulting TorrentClient service in $scope.rpc
-             * Starts polling every 1s.
-             */
-            Update: function(dontLoop) {
-                if (self.isPolling == true) {
-                    methods.statusQuery().then(function(data) {
-                        if (undefined === dontLoop && self.isPolling && !data.error) {
-                            setTimeout(methods.Update, 3000);
-                        }
-                    });
-                }
-            },
-            isConnected: function() {
-                return self.connected;
-            },
-
-            Disconnect: function() {
-                self.isPolling = false;
-                TransmissionRemote.torrents = {};
-                TransmissionRemote.eventHandlers = {};
-            },
-
-            getFilesList: function(hash) {
-                return json('files', hash).then(function(data) {
-                    return data;
-                });
-            },
-
-            addMagnet: function(magnet) {
+            this.addMagnet = function(magnetHash) {
                 return rpc('torrent-add', {
                     "arguments": {
                         "paused": false,
-                        "filename": magnet
+                        "filename": magnetHash
                     }
-                })
-            },
-            execute: function(method, id) {
+                });
+            };
+
+            this.execute = function(method, id) {
                 return rpc(method, {
                     "arguments": {
                         ids: [id]
                     }
-                })
-            }
-
+                });
+            };
 
         };
-        return methods;
+
+        TransmissionAPI.prototype = Object.create(BaseHTTPApi.prototype);
+        TransmissionAPI.prototype.constructor = BaseHTTPApi;
+
+
+        return new TransmissionAPI();
     }
 ])
 
-/**
- * uTorrent/Bittorrent remote singleton that receives the incoming data
- */
-.factory('TransmissionRemote', ["$rootScope", "DuckieTorrent",
 
-    function($rootScope, DuckieTorrent) {
 
-        var service = {
-            torrents: {},
-            settings: {},
+.factory('Transmission', ["BaseTorrentClient", "TransmissionRemote", "TransmissionAPI",
+    function(BaseTorrentClient, TransmissionRemote, TransmissionAPI) {
 
-            getTorrentName: function(torrent) {
-                return torrent.name;
-            },
+        var Transmission = function() {};
 
-            getTorrents: function() {
-                var out = [];
-                angular.forEach(service.torrents, function(el) {
-                    out.push(el);
-                });
-                return out;
-            },
+        Transmission.prototype = Object.create(BaseTorrentClient.prototype);
+        Transmission.prototype.constructor = BaseTorrentClient;
+        var service = new Transmission();
 
-            getByHash: function(hash) {
-                return (hash in service.torrents) ? service.torrents[hash] : null;
-            },
+        service.setName('Transmission');
+        service.setAPI(TransmissionAPI);
+        service.setRemote(TransmissionRemote);
 
-            handleEvent: function(data) {
-                var key = data.hash.toUpperCase();
-                if (!(key in service.torrents)) {
-                    service.torrents[key] = new TransmissionData(data);
-                } else {
-                    service.torrents[key].update(data);
-                }
+        service.setConfigMappings({
+            server: 'transmission.server',
+            port: 'transmission.port',
+            username: 'transmission.username',
+            password: 'transmission.password',
+            use_auth: 'transmission.use_auth'
+        });
 
-                $rootScope.$broadcast('torrent:update:' + key, service.torrents[key]);
-                $rootScope.$broadcast('torrent:update:', service.torrents[key]);
-            },
+        service.setEndpoints({
+            rpc: '/transmission/rpc'
+        });
 
-            onTorrentUpdate: function(hash, callback) {
-                $rootScope.$on('torrent:update:' + hash, function(evt, torrent) {
-                    callback(torrent)
-                });
-            },
+        service.readConfig();
 
-            offTorrentUpdate: function(hash, callback) {
-                $rootScope.$off('torrent:update:' + hash, function(evt, torrent) {
-                    callback(torrent)
-                });
-            }
+        return service;
+    }
+])
+
+
+.factory('TransmissionRemote', ["BaseTorrentRemote",
+    function(BaseTorrentRemote) {
+
+        var TransmissionRemote = function() {
+
         };
 
-        window.qbt = service;
-        return service;
+        TransmissionRemote.prototype = Object.create(BaseTorrentRemote.prototype);
+        TransmissionRemote.prototype.constructor = BaseTorrentRemote;
+
+        TransmissionRemote.dataClass = TransmissionData;
+
+        return new TransmissionRemote();
     }
 ])
 
@@ -358,4 +175,4 @@ DuckieTorrent
         DuckieTorrent.register('Transmission', Transmission);
 
     }
-])
+]);

@@ -4,53 +4,53 @@ DuckieTV
 .factory('BaseTorrentRemote', ["$rootScope",
     function($rootScope) {
 
-        var service = {
-            dataClass: null,
-            torrents: {},
-            settings: {},
+        function BaseTorrentRemote() {
 
-            getTorrents: function() {
-                var out = [];
-                angular.forEach(service.torrents, function(el) {
-                    out.push(el);
-                });
-                return out;
-            },
+        }
 
-            getByHash: function(hash) {
-                hash = hash.toUpperCase();
-                return (hash in service.torrents) ? service.torrents[hash] : null;
-            },
+        BaseTorrentRemote.prototype.dataClass = null;
+        BaseTorrentRemote.prototype.torrents = {};
+        BaseTorrentRemote.prototype.settings = {};
 
-            handleEvent: function(data) {
-                var key = data.hash.toUpperCase();
-                if (!(key in service.torrents)) {
-                    if (!service.dataClass) {
-                        throw "No data class set for this torrent remote!";
-                    }
-                    service.torrents[key] = new service.dataClass(data);
-                } else {
-                    service.torrents[key].update(data);
-                }
-
-                $rootScope.$broadcast('torrent:update:' + key, service.torrents[key]);
-                $rootScope.$broadcast('torrent:update:', service.torrents[key]);
-            },
-
-            onTorrentUpdate: function(hash, callback) {
-                $rootScope.$on('torrent:update:' + hash, function(evt, torrent) {
-                    callback(torrent);
-                });
-            },
-
-            offTorrentUpdate: function(hash, callback) {
-                $rootScope.$off('torrent:update:' + hash, function(evt, torrent) {
-                    callback(torrent);
-                });
-            }
+        BaseTorrentRemote.prototype.getTorrents = function() {
+            return Object.keys(this.torrents).map(function(el) {
+                return this.torrents[el];
+            }, this);
         };
-        return service;
 
+        BaseTorrentRemote.prototype.getByHash = function(hash) {
+            hash = hash.toUpperCase();
+            return (hash in this.torrents) ? this.torrents[hash] : null;
+        };
+
+        BaseTorrentRemote.prototype.handleEvent = function(data) {
+            var key = data.hash.toUpperCase();
+            if (!(key in this.torrents)) {
+                if (!this.dataClass) {
+                    throw "No data class set for this torrent remote!";
+                }
+                this.torrents[key] = new this.dataClass(data);
+            } else {
+                this.torrents[key].update(data);
+            }
+
+            $rootScope.$broadcast('torrent:update:' + key, this.torrents[key]);
+            $rootScope.$broadcast('torrent:update:', this.torrents[key]);
+        };
+
+        BaseTorrentRemote.prototype.onTorrentUpdate = function(hash, callback) {
+            $rootScope.$on('torrent:update:' + hash, function(evt, torrent) {
+                callback(torrent);
+            });
+        };
+
+        BaseTorrentRemote.prototype.offTorrentUpdate = function(hash, callback) {
+            $rootScope.$off('torrent:update:' + hash, function(evt, torrent) {
+                callback(torrent);
+            });
+        };
+
+        return BaseTorrentRemote;
 
     }
 ])
@@ -58,84 +58,83 @@ DuckieTV
 
 .factory('BaseTorrentClient', ["$q", "$http", "URLBuilder", "$parse", "SettingsService",
     function($q, $http, URLBuilder, $parse, SettingsService) {
-        var self = this;
 
-        this.name = 'Base Torent Client';
+        var BaseTorrentClient = function() {
 
-        this.config = {
-            server: null,
-            port: null,
-            username: null,
-            use_auth: null
+            this.name = 'Base Torent Client';
+            this.remoteClass = null;
+            this.apiImplementation = null;
+
         };
 
-        this.endpoints = {
-            torrents: null,
-            portscan: null,
-            addmagnet: null
-        };
+        var methods = {
 
-        this.configMappings = {
-            server: null,
-            port: null,
-            username: null,
-            password: null,
-            use_auth: null
-        };
+            configMappings: {
+                server: null,
+                port: null,
+                username: null,
+                password: null,
+                use_auth: null
+            },
 
-        this.isPolling = false;
-        this.isConnecting = false;
-        this.connected = false;
-        this.initialized = false;
-
-
-        var service = {
+            isPolling: false,
+            isConnecting: false,
+            connected: false,
+            initialized: false,
 
             setConfig: function(config) {
-                self.config = config;
+                this.config = config;
+                this.apiClass.config = this.config;
             },
 
             saveConfig: function() {
-                Object.keys(self.config).map(function(key) {
-                    SettingsService.set(self.configMappings[key], self.config[key]);
-                });
+                Object.keys(this.configMappings).map(function(key) {
+                    SettingsService.set(this.configMappings[key], this.apiImplementation.config[key]);
+                }, this);
             },
             readConfig: function() {
-                Object.keys(self.configMappings).map(function(key) {
-                    self.config[key] = SettingsService.get(self.configMappings[key]);
-                });
+                Object.keys(this.configMappings).map(function(key) {
+                    this.apiImplementation.config[key] = SettingsService.get(this.configMappings[key]);
+                }, this);
             },
             setName: function(name) {
-                self.name = name;
+                this.name = name;
             },
             getName: function(name) {
-                return self.name;
+                return this.name;
             },
+
             setConfigMappings: function(mappings) {
                 Object.keys(mappings).map(function(key) {
-                    self.configMappings[key] = mappings[key];
-                });
+                    this.configMappings[key] = mappings[key];
+                }, this);
             },
             setEndpoints: function(endpoints) {
                 Object.keys(endpoints).map(function(key) {
-                    self.endpoints[key] = endpoints[key];
-
-                });
+                    this.apiImplementation.endpoints[key] = endpoints[key];
+                }, this);
             },
 
-
             setRemote: function(remoteImplementation) {
-                service.remoteClass = remoteImplementation;
+                this.remoteClass = remoteImplementation;
+            },
+
+            setAPI: function(apiImplementation) {
+                this.apiImplementation = apiImplementation;
+            },
+
+            getAPI: function() {
+                return this.apiImplementation;
             },
 
             /**
              * Return the interface that handles the remote data.
              */
             getRemote: function() {
-                if (service.remoteClass === null) {
-                    throw "No torrent remote assigned to " + service.getName() + "implementation!";
+                if (this.remoteClass === null) {
+                    throw "No torrent remote assigned to " + this.getName() + "implementation!";
                 }
-                return service.remoteClass;
+                return this.remoteClass;
             },
 
             /**
@@ -146,30 +145,30 @@ DuckieTV
              * If it's connected and initialized, a promise will return that immediately resolves with the remote interface.
              */
             AutoConnect: function() {
-                if (!self.isConnecting && !self.connected) {
-                    self.connectPromise = $q.defer();
-                    self.isConnecting = true;
+                if (!this.isConnecting && !this.connected) {
+                    this.connectPromise = $q.defer();
+                    this.isConnecting = true;
                 } else {
-                    return (!self.connected || !self.initialized) ? self.connectPromise.promise : $q(function(resolve) {
-                        resolve(methods.getRemote());
-                    });
+                    return (!this.connected || !this.initialized) ? this.connectPromise.promise : $q(function(resolve) {
+                        resolve(this.getRemote());
+                    }.bind(this));
                 }
-
-                methods.connect().then(function(result) {
-                    console.log("Tixati connected!");
+                var self = this;
+                this.connect().then(function(result) {
+                    console.log(self.getName() + " connected!");
                     if (!self.isPolling) {
                         self.isPolling = true;
-                        methods.Update();
+                        self.Update();
                     }
-                    self.connectPromise.resolve(methods.getRemote());
+                    self.connectPromise.resolve(self.getRemote());
                 });
 
                 return self.connectPromise.promise;
             },
 
             togglePolling: function() {
-                self.isPolling = !self.isPolling;
-                self.Update();
+                this.isPolling = !this.isPolling;
+                this.Update();
             },
             /**
              * Start the status update polling.
@@ -177,29 +176,31 @@ DuckieTV
              * Starts polling every 1s.
              */
             Update: function(dontLoop) {
-                if (self.isPolling === true) {
-                    methods.getTorrents().then(function(data) {
+                if (this.isPolling === true) {
+                    var self = this;
+                    this.getTorrents().then(function(data) {
                         if (undefined === dontLoop && self.isPolling && !data.error) {
-                            setTimeout(methods.Update, 3000);
+                            setTimeout(self.Update, 3000);
                         }
                     });
                 }
             },
 
             isConnected: function() {
-                return self.connected;
+                return this.connected;
             },
 
             Disconnect: function() {
-                self.isPolling = false;
-                service.getRemote().torrents = {};
-                service.getRemote().eventHandlers = {};
+                this.isPolling = false;
+                this.getRemote().torrents = {};
+                this.getRemote().eventHandlers = {};
             },
 
             /**
              * -------------------------------------------------------------
-             * Implement the methods below when adding a new torrent client.
-             * -------------------------------------------------------------             *
+             * Optionally overwrite the implementatino of the methods below when adding a new torrent client.
+             * You shouldn't have to, your API implementation should do the work.
+             * -------------------------------------------------------------
              */
 
 
@@ -216,7 +217,13 @@ DuckieTV
              *  })
              */
             connect: function() {
-                throw "connect not implemented for " + this.getName() + ". example in BaseTorrentClient.js";
+                var self = this;
+                return this.getAPI().portscan().then(function(result) { // check if client webui is reachable
+                    console.log(self.getName() + " check result: ", result);
+                    self.connected = true; // we are now connected
+                    self.isConnecting = false; // we are no longer connecting
+                    return true;
+                });
             },
 
             /** 
@@ -224,10 +231,18 @@ DuckieTV
              * Parses out the events, updates, properties and methods and dispatches them to the TorrentRemote interface
              * for storage, handling and attaching RPC methods.
              */
-            getTorrents: function() {
-                throw "getTorrents not implemented for " + this.getName();
-            },
 
+            getTorrents: function() {
+                var self = this,
+                    remote = this.getRemote();
+                return this.getAPI().getTorrents()
+                    .then(function(data) {
+                        data.map(remote.handleEvent);
+                        return data;
+                    }, function(error) {
+                        throw "Error executing Tixati getTorrents";
+                    });
+            },
             /**
              * Implement this function to be able to add a magnet to the client
              */
@@ -239,7 +254,13 @@ DuckieTV
                 return request(type, params, options);
             }
 
+
         };
-        return service;
+
+        Object.keys(methods).map(function(key) {
+            BaseTorrentClient.prototype[key] = methods[key];
+        });
+
+        return BaseTorrentClient;
     }
 ]);
