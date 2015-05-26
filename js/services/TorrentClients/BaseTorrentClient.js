@@ -239,7 +239,7 @@ DuckieTV
                 return this.getAPI().getTorrents()
                     .then(function(data) {
                         data.map(function(torrent) {
-                            remote.handleEvent(torrent)
+                            remote.handleEvent(torrent);
                         });
                         return data;
                     }, function(error) {
@@ -250,9 +250,9 @@ DuckieTV
              * Implement this function to be able to add a magnet to the client
              */
             addMagnet: function(magnet) {
-                if(!('addMagnet' in this.getAPI())) {
-                throw "addMagnet not implemented for " + this.getName();
-            }
+                if (!('addMagnet' in this.getAPI())) {
+                    throw "addMagnet not implemented for " + this.getName();
+                }
                 return this.getAPI().addMagnet(magnet);
 
             },

@@ -15,11 +15,11 @@ TransmissionData.extends(TorrentData, {
     },
 
     start: function() {
-        this.getClient().execute('torrent-start', this.id);
+        this.getClient().getAPI().execute('torrent-start', this.id);
     },
 
     stop: function() {
-        this.getClient().execute('torrent-stop', this.id);
+        this.getClient().getAPI().execute('torrent-stop', this.id);
     },
 
     pause: function() {
@@ -28,6 +28,10 @@ TransmissionData.extends(TorrentData, {
 
     isStarted: function() {
         return this.status > 0;
+    },
+
+    getFiles: function() {
+        return this.files;
     }
 });
 

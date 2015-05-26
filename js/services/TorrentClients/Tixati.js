@@ -17,13 +17,13 @@ TixatiData.extends(TorrentData, {
     start: function() {
         var fd = new FormData();
         fd.append('start', 'Start');
-        return this.getClient().execute(this.guid, fd);
+        return this.getClient().getAPI().execute(this.guid, fd);
     },
 
     stop: function() {
         var fd = new FormData();
         fd.append('stop', 'Stop');
-        return this.getClient().execute(this.guid, fd);
+        return this.getClient().getAPI().execute(this.guid, fd);
     },
     pause: function() {
         return this.stop();
@@ -34,7 +34,7 @@ TixatiData.extends(TorrentData, {
     },
 
     getFiles: function() {
-        this.getClient().getFiles(this.guid).then(function(data) {
+        this.getClient().getAPI().getFiles(this.guid).then(function(data) {
             this.files = data;
         }.bind(this));
     }
