@@ -39,14 +39,15 @@ DuckieTorrent
 
         var TransmissionAPI = function() {
             this.sessionID = null;
-
             var self = this;
 
-            function rpc(method, params, options) {
-                var
+
+            this.rpc = function(method, params, options) {
+                var self = this,
                     request = {
                         'method': method
                     };
+
                 for (var i in params) {
                     request[i] = params[i];
                 }
@@ -54,81 +55,85 @@ DuckieTorrent
                 function handleError(e, f) {
                     self.sessionID = e.headers('X-Transmission-Session-Id');
                     if (e.status === 409) {
-                        return rpc(method, request, options);
+                        return self.rpc(method, request, options);
                     }
                 }
 
                 var headers = {
-                'X-Transmission-Session-Id': self.sessionID
+                    'X-Transmission-Session-Id': self.sessionID
                 };
 
-                if (self.config.use_auth) {
-                    headers.Authorization = 'Basic ' + Base64.encode(self.config.username + ':' + self.config.password);
+                if (this.config.use_auth) {
+                    headers.Authorization = 'Basic ' + Base64.encode(this.config.username + ':' + this.config.password);
                 }
 
-                return $http.post(self.getUrl('rpc'), request, {
+                return $http.post(this.getUrl('rpc'), request, {
                     headers: headers
                 }).then(function(response) {
                     return response.data;
                 }, handleError);
-            }
-
-            this.portscan = function() {
-                return rpc('session-get').then(function(result) {
-                    return result !== undefined;
-                });
             };
-
-            this.getTorrents = function() {
-                return rpc('torrent-get', {
-                    arguments: {
-                        "fields": ["id", "name", "hashString", "status", "error", "errorString", "eta", "isFinished", "isStalled", "leftUntilDone", "metadataPercentComplete", "percentDone", "sizeWhenDone", "files"]
-                    }
-                }).then(function(data) {
-                    return data.arguments.torrents.map(function(el) {
-                        el.hash = el.hashString.toUpperCase();
-                        return el;
-                    });
-                });
-            };
-
-            this.addMagnet = function(magnetHash) {
-                return rpc('torrent-add', {
-                    "arguments": {
-                        "paused": false,
-                        "filename": magnetHash
-                    }
-                });
-            };
-
-            this.execute = function(method, id) {
-                return rpc(method, {
-                    "arguments": {
-                        ids: [id]
-                    }
-                });
-            };
-
         };
 
-        TransmissionAPI.prototype = Object.create(BaseHTTPApi.prototype);
+        TransmissionAPI.prototype = BaseHTTPApi.prototype;
         TransmissionAPI.prototype.constructor = BaseHTTPApi;
 
+        TransmissionAPI.prototype.portscan = function() {
+            return this.rpc('session-get').then(function(result) {
+                return result !== undefined;
+            });
+        };
+
+        TransmissionAPI.prototype.getTorrents = function() {
+            return this.rpc('torrent-get', {
+                arguments: {
+                    "fields": ["id", "name", "hashString", "status", "error", "errorString", "eta", "isFinished", "isStalled", "leftUntilDone", "metadataPercentComplete", "percentDone", "sizeWhenDone", "files"]
+                }
+            }).then(function(data) {
+                return data.arguments.torrents.map(function(el) {
+                    el.hash = el.hashString.toUpperCase();
+                    return el;
+                });
+            });
+        };
+
+        TransmissionAPI.prototype.addMagnet = function(magnetHash) {
+            return this.rpc('torrent-add', {
+                "arguments": {
+                    "paused": false,
+                    "filename": magnetHash
+                }
+            });
+        };
+
+        TransmissionAPI.prototype.execute = function(method, id) {
+            return this.rpc(method, {
+                "arguments": {
+                    ids: [id]
+                }
+            });
+        };
 
         return new TransmissionAPI();
     }
 ])
 
 
-
 .factory('Transmission', ["BaseTorrentClient", "TransmissionRemote", "TransmissionAPI",
     function(BaseTorrentClient, TransmissionRemote, TransmissionAPI) {
 
-        var Transmission = function() {};
+        var Transmission = function() {
+            console.log("Created object transmission!");
+            var self = this;
+            this.constructor();
 
-        Transmission.prototype = Object.create(BaseTorrentClient.prototype);
+        };
+
+        Transmission.prototype = BaseTorrentClient.prototype;
         Transmission.prototype.constructor = BaseTorrentClient;
         var service = new Transmission();
+
+        //service.constructor();
 
         service.setName('Transmission');
         service.setAPI(TransmissionAPI);
@@ -157,13 +162,16 @@ DuckieTorrent
     function(BaseTorrentRemote) {
 
         var TransmissionRemote = function() {
+            var self = this;
+            this.torrents = {};
+            this.constructor();
 
         };
 
-        TransmissionRemote.prototype = Object.create(BaseTorrentRemote.prototype);
+        TransmissionRemote.prototype = BaseTorrentRemote.prototype;
         TransmissionRemote.prototype.constructor = BaseTorrentRemote;
 
-        TransmissionRemote.dataClass = TransmissionData;
+        TransmissionRemote.prototype.dataClass = TransmissionData;
 
         return new TransmissionRemote();
     }

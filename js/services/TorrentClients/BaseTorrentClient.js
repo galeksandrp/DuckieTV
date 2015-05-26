@@ -5,23 +5,10 @@ DuckieTV
     function($rootScope) {
 
         function BaseTorrentRemote() {
+            console.log("Created object BaseTorrentRemote!", this);
+
 
         }
-
-        BaseTorrentRemote.prototype.dataClass = null;
-        BaseTorrentRemote.prototype.torrents = {};
-        BaseTorrentRemote.prototype.settings = {};
-
-        BaseTorrentRemote.prototype.getTorrents = function() {
-            return Object.keys(this.torrents).map(function(el) {
-                return this.torrents[el];
-            }, this);
-        };
-
-        BaseTorrentRemote.prototype.getByHash = function(hash) {
-            hash = hash.toUpperCase();
-            return (hash in this.torrents) ? this.torrents[hash] : null;
-        };
 
         BaseTorrentRemote.prototype.handleEvent = function(data) {
             var key = data.hash.toUpperCase();
@@ -36,6 +23,20 @@ DuckieTV
 
             $rootScope.$broadcast('torrent:update:' + key, this.torrents[key]);
             $rootScope.$broadcast('torrent:update:', this.torrents[key]);
+        };
+
+        BaseTorrentRemote.prototype.torrents = {};
+        BaseTorrentRemote.prototype.dataClass = null;
+
+        BaseTorrentRemote.prototype.getTorrents = function() {
+            return Object.keys(this.torrents).map(function(el) {
+                return this.torrents[el];
+            }, this);
+        };
+
+        BaseTorrentRemote.prototype.getByHash = function(hash) {
+            hash = hash.toUpperCase();
+            return (hash in this.torrents) ? this.torrents[hash] : null;
         };
 
         BaseTorrentRemote.prototype.onTorrentUpdate = function(hash, callback) {
@@ -237,7 +238,9 @@ DuckieTV
                     remote = this.getRemote();
                 return this.getAPI().getTorrents()
                     .then(function(data) {
-                        data.map(remote.handleEvent);
+                        data.map(function(torrent) {
+                            remote.handleEvent(torrent)
+                        });
                         return data;
                     }, function(error) {
                         throw "Error executing Tixati getTorrents";
@@ -247,7 +250,11 @@ DuckieTV
              * Implement this function to be able to add a magnet to the client
              */
             addMagnet: function(magnet) {
+                if(!('addMagnet' in this.getAPI())) {
                 throw "addMagnet not implemented for " + this.getName();
+            }
+                return this.getAPI().addMagnet(magnet);
+
             },
 
             request: function(type, params, options) {
