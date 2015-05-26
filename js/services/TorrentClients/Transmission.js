@@ -77,46 +77,46 @@ DuckieTorrent
                     return response.data;
                 }, handleError);
             };
+
+            this.portscan = function() {
+                return this.rpc('session-get').then(function(result) {
+                    return result !== undefined;
+                });
+            };
+
+            this.getTorrents = function() {
+                return this.rpc('torrent-get', {
+                    arguments: {
+                        "fields": ["id", "name", "hashString", "status", "error", "errorString", "eta", "isFinished", "isStalled", "leftUntilDone", "metadataPercentComplete", "percentDone", "sizeWhenDone", "files"]
+                    }
+                }).then(function(data) {
+                    return data.arguments.torrents.map(function(el) {
+                        el.hash = el.hashString.toUpperCase();
+                        return el;
+                    });
+                });
+            };
+
+            this.addMagnet = function(magnetHash) {
+                return this.rpc('torrent-add', {
+                    "arguments": {
+                        "paused": false,
+                        "filename": magnetHash
+                    }
+                });
+            };
+
+            this.execute = function(method, id) {
+                return this.rpc(method, {
+                    "arguments": {
+                        ids: [id]
+                    }
+                });
+            };
         };
 
         TransmissionAPI.prototype = BaseHTTPApi.prototype;
         TransmissionAPI.prototype.constructor = BaseHTTPApi;
-
-        TransmissionAPI.prototype.portscan = function() {
-            return this.rpc('session-get').then(function(result) {
-                return result !== undefined;
-            });
-        };
-
-        TransmissionAPI.prototype.getTorrents = function() {
-            return this.rpc('torrent-get', {
-                arguments: {
-                    "fields": ["id", "name", "hashString", "status", "error", "errorString", "eta", "isFinished", "isStalled", "leftUntilDone", "metadataPercentComplete", "percentDone", "sizeWhenDone", "files"]
-                }
-            }).then(function(data) {
-                return data.arguments.torrents.map(function(el) {
-                    el.hash = el.hashString.toUpperCase();
-                    return el;
-                });
-            });
-        };
-
-        TransmissionAPI.prototype.addMagnet = function(magnetHash) {
-            return this.rpc('torrent-add', {
-                "arguments": {
-                    "paused": false,
-                    "filename": magnetHash
-                }
-            });
-        };
-
-        TransmissionAPI.prototype.execute = function(method, id) {
-            return this.rpc(method, {
-                "arguments": {
-                    ids: [id]
-                }
-            });
-        };
 
         return new TransmissionAPI();
     }
