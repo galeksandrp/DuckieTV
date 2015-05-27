@@ -180,8 +180,11 @@ DuckieTV
                 if (this.isPolling === true) {
                     var self = this;
                     this.getTorrents().then(function(data) {
+                        console.log(new Date().toString(), "Got torrents!, scheduling next loop", data);
                         if (undefined === dontLoop && self.isPolling && !data.error) {
-                            setTimeout(self.Update, 3000);
+                            setTimeout(function() {
+                                self.Update()
+                            }, 3000);
                         }
                     });
                 }
@@ -221,9 +224,12 @@ DuckieTV
                 var self = this;
                 return this.getAPI().portscan().then(function(result) { // check if client webui is reachable
                     console.log(self.getName() + " check result: ", result);
-                    self.connected = true; // we are now connected
-                    self.isConnecting = false; // we are no longer connecting
-                    return true;
+                    if (!result) {
+                        throw self.getName() + " Connect call failed. No client listening";
+                    }
+                    self.connected = result; // we are now connected
+                    self.isConnecting = !result; // we are no longer connecting
+                    return result;
                 });
             },
 

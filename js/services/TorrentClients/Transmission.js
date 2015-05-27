@@ -81,6 +81,8 @@ DuckieTorrent
             this.portscan = function() {
                 return this.rpc('session-get').then(function(result) {
                     return result !== undefined;
+                }, function() {
+                    return false;
                 });
             };
 
