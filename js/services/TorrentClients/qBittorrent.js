@@ -11,7 +11,7 @@ qBittorrentData.extends(TorrentData, {
         return this.name;
     },
     getProgress: function() {
-        return this.round(this.percentDone * 100, 1);
+        return this.round(this.progress * 100, 1);
     },
     start: function() {
         this.getClient().getAPI().execute('resume', this.hash);
@@ -63,7 +63,9 @@ DuckieTorrent.factory('qBittorrentRemote', ["BaseTorrentRemote",
                 });
             },
             getTorrents: function() {
-                return this.request('torrents');
+                return this.request('torrents').then(function(data) {
+                    return data.data;
+                });
             },
             getFiles: function(hash) {
                 return this.request('files', hash).then(function(data) {
@@ -88,7 +90,7 @@ DuckieTorrent.factory('qBittorrentRemote', ["BaseTorrentRemote",
                 if (this.config.use_auth) {
                     headers.Authorization = 'Basic ' + Base64.encode(this.config.username + ':' + this.config.password);
                 }
-                return $http.post(self.getUrl(method), 'hash=' + id, {
+                return $http.post(this.getUrl(method), 'hash=' + id, {
                     headers: headers
                 });
             }

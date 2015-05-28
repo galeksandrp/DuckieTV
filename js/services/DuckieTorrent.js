@@ -89,7 +89,7 @@ String.capitalize = function(s) {
  */
 Object.deepMerge = function(obj1, obj2) {
     for (var i in obj2) { // add the remaining properties from object 2
-        if (typeof obj2[i] !== 'object' && typeof obj2[i] !== 'array') {
+        if (typeof obj2[i] !== 'object') {
             obj1[i] = obj2[i];
         } else {
             obj1[i] = Object.deepMerge(i in obj1 ? obj1[i] : {}, obj2[i]);

@@ -32,7 +32,7 @@ Function.prototype.extends = function(ParentClass, prototypeImplementations) {
  */
 var HTMLScraper = function(text) {
     var parser = new DOMParser();
-    this.doc = parser.parseFromString(result.data, "text/html");
+    this.doc = parser.parseFromString(text, "text/html");
 
     this.walkSelector = function(selector, callback) {
         return this.walkNodes(this.querySelectorAll(selector), callback);

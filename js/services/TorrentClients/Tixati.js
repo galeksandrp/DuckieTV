@@ -36,13 +36,10 @@ TixatiData.extends(TorrentData, {
 });
 
 
-DuckieTorrent
-
-
 /**
  * Tixati remote singleton that receives the incoming data
  */
-.factory('TixatiRemote', ["BaseTorrentRemote",
+DuckieTorrent.factory('TixatiRemote', ["BaseTorrentRemote",
     function(BaseTorrentRemote) {
 
         var TixatiRemote = function() {

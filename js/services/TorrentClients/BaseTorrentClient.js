@@ -1,7 +1,4 @@
-DuckieTV
-
-
-.factory('BaseTorrentRemote', ["$rootScope",
+DuckieTorrent.factory('BaseTorrentRemote', ["$rootScope",
     function($rootScope) {
 
         function BaseTorrentRemote() {
@@ -203,7 +200,7 @@ DuckieTV
 
             /**
              * -------------------------------------------------------------
-             * Optionally overwrite the implementatino of the methods below when adding a new torrent client.
+             * Optionally overwrite the implementation of the methods below when adding a new torrent client.
              * You shouldn't have to, your API implementation should do the work.
              * -------------------------------------------------------------
              */
@@ -214,7 +211,7 @@ DuckieTV
              *
              *
              * Example:
-             * return request('portscan').then(function(result) { // check if client webui is reachable
+ *        return request('portscan').then(function(result) { // check if client webui is reachable
              *   console.log(service.getName() + " check result: ", result);
              *   self.connected = true; // we are now connected
              *   self.isConnecting = false; // we are no longer connecting

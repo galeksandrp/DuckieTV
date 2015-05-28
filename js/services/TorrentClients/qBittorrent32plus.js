@@ -2,7 +2,7 @@
  * qBittorrent32plus < 3.2 client
  */
 
-DuckieTV.factory('qBittorrent32plusAPI', ['qBittorrentAPI', '$http',
+DuckieTorrent.factory('qBittorrent32plusAPI', ['qBittorrentAPI', '$http',
     function(qBittorrentAPI, $http) {
 
         var qBittorrent32plusAPI = function() {
@@ -45,7 +45,7 @@ DuckieTV.factory('qBittorrent32plusAPI', ['qBittorrentAPI', '$http',
                 var headers = {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 };
-                return $http.post(self.getUrl(method), 'hash=' + id, {
+                return $http.post(this.getUrl(method), 'hash=' + id, {
                     headers: headers
                 });
             }

@@ -46,6 +46,13 @@
           </a>
       </td>
     </tr>
+     <tr ui-sref=".tab({tab: 'utorrentwebui'})" ng-if="getSetting('torrenting.enabled') && getSetting('torrenting.client') == 'uTorrent Web UI'">
+      <td colspan="2">
+          <a href="#/settings/utorrentwebui">
+              <img src="img/torrentclients/utorrent-small.png" class="smallsettingicon"> <strong>&micro;Torrent Web UI {{'SIDEPANEL/SETTINGS/integration/hdr'|translate}}</strong>
+          </a>
+      </td>
+    </tr>
     <tr ui-sref=".tab({tab: 'qbittorrent'})" ng-if="getSetting('torrenting.enabled') && getSetting('torrenting.client') == 'qBittorrent'">
       <td colspan="2">
           <a href="#/settings/qbittorrent">
@@ -60,7 +67,7 @@
           </a>
       </td>
     </tr>
-    <tr ui-sref=".tab({tab: 'tixati'})" ng-if="getSetting('torrenting.enabled') && getSetting('torrenting.client') == 'tixati'">
+    <tr ui-sref=".tab({tab: 'tixati'})" ng-if="getSetting('torrenting.enabled') && getSetting('torrenting.client') == 'Tixati'">
       <td colspan="2">
           <a href="#/settings/tixati">
               <img src="img/torrentclients/tixati-small.png" class="smallsettingicon"> <strong>Tixati {{'SIDEPANEL/SETTINGS/integration/hdr'|translate}}</strong>
