@@ -94,7 +94,6 @@ DuckieTorrent.factory('BaseTorrentRemote', ["$rootScope",
                 Object.keys(this.configMappings).map(function(key) {
                     this.apiImplementation.config[key] = this.config[key] = SettingsService.get(this.configMappings[key]);
                 }, this);
-                console.log("Config read: ", this.config);
             },
             setName: function(name) {
                 this.name = name;
@@ -178,7 +177,6 @@ DuckieTorrent.factory('BaseTorrentRemote', ["$rootScope",
                 if (this.isPolling === true) {
                     var self = this;
                     this.getTorrents().then(function(data) {
-                        console.log(new Date().toString(), "Got torrents!, scheduling next loop", data);
                         if (undefined === dontLoop && self.isPolling && !data.error) {
                             setTimeout(function() {
                                 self.Update();
@@ -211,7 +209,7 @@ DuckieTorrent.factory('BaseTorrentRemote', ["$rootScope",
              *
              *
              * Example:
- *        return request('portscan').then(function(result) { // check if client webui is reachable
+             *        return request('portscan').then(function(result) { // check if client webui is reachable
              *   console.log(service.getName() + " check result: ", result);
              *   self.connected = true; // we are now connected
              *   self.isConnecting = false; // we are no longer connecting

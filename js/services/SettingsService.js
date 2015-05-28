@@ -143,7 +143,11 @@ DuckieTV.factory('ChromePermissions', ["$q",
                 'utorrentwebui.port': 8080,
                 'utorrentwebui.username': 'admin',
                 'utorrentwebui.password': '',
-                'utorrentwebui.use_auth': true
+                'utorrentwebui.use_auth': true,
+                'deluge.server': 'http://localhost',
+                'deluge.port': 8112,
+                'deluge.password': 'deluge',
+                'deluge.use_auth': true
             },
             /**
              * Read a setting key and return either the stored value or the default

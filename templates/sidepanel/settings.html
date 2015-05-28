@@ -46,6 +46,13 @@
           </a>
       </td>
     </tr>
+     <tr ui-sref=".tab({tab: 'deluge'})" ng-if="getSetting('torrenting.enabled') && getSetting('torrenting.client') == 'Deluge'">
+      <td colspan="2">
+          <a href="#/settings/deluge">
+              <img src="img/torrentclients/deluge-small.png" class="smallsettingicon"> <strong>Deluge {{'SIDEPANEL/SETTINGS/integration/hdr'|translate}}</strong>
+          </a>
+      </td>
+    </tr>
      <tr ui-sref=".tab({tab: 'utorrentwebui'})" ng-if="getSetting('torrenting.enabled') && getSetting('torrenting.client') == 'uTorrent Web UI'">
       <td colspan="2">
           <a href="#/settings/utorrentwebui">
