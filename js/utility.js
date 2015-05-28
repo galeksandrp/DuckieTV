@@ -6,15 +6,15 @@
  */
 
 Function.prototype.extends = function(ParentClass, prototypeImplementations) {
-    this.prototype = ParentClass.prototype;
+    this.prototype = Object.create(ParentClass.prototype);
     this.prototype.constructor = ParentClass;
     if (undefined === prototypeImplementations) {
         prototypeImplementations = {};
     }
 
-    // add all prototypeImplementations to the prototype chain for this function.
+    // add all prototypeImplementations to the non-prototype chain for this function.
     Object.keys(prototypeImplementations).map(function(key) {
-        this[key] = prototypeImplementations[key];
+        this.prototype[key] = prototypeImplementations[key];
     }, this);
 };
 

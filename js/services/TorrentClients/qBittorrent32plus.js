@@ -6,7 +6,7 @@ DuckieTV.factory('qBittorrent32plusAPI', ['qBittorrentAPI', '$http',
     function(qBittorrentAPI, $http) {
 
         var qBittorrent32plusAPI = function() {
-            this.constructor();
+            qBittorrentAPI.call(this);
         };
         qBittorrent32plusAPI.extends(qBittorrentAPI, {
             login: function() {
@@ -59,7 +59,7 @@ DuckieTV.factory('qBittorrent32plusAPI', ['qBittorrentAPI', '$http',
     function(BaseTorrentClient, qBittorrentRemote, qBittorrent32plusAPI) {
 
         var qBittorrent32plus = function() {
-            //this.constructor();
+            BaseTorrentClient.call(this);
         };
         qBittorrent32plus.extends(BaseTorrentClient, {});
 

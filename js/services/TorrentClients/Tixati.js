@@ -45,10 +45,11 @@ DuckieTorrent
 .factory('TixatiRemote', ["BaseTorrentRemote",
     function(BaseTorrentRemote) {
 
-        var TixatiRemote = function() {};
-        TixatiRemote.extends(BaseTorrentRemote, {
-            dataClass: TixatiData
-        });
+        var TixatiRemote = function() {
+            BaseTorrentRemote.call(this);
+            this.dataClass = TixatiData;
+        };
+        TixatiRemote.extends(BaseTorrentRemote);
 
         return TixatiRemote;
     }
@@ -59,7 +60,7 @@ DuckieTorrent
     function(BaseHTTPApi) {
 
         var TixatiAPI = function() {
-            this.constructor();
+            BaseHTTPApi.call(this);
         };
         TixatiAPI.extends(BaseHTTPApi, {
             portscan: function() {
@@ -181,7 +182,7 @@ DuckieTorrent
     function(BaseTorrentClient, TixatiRemote, TixatiAPI) {
 
         var Tixati = function() {
-            this.constructor();
+            BaseTorrentClient.call(this);
         };
         Tixati.extends(BaseTorrentClient);
 

@@ -32,10 +32,11 @@ TransmissionData.extends(TorrentData, {
 DuckieTorrent.factory('TransmissionRemote', ["BaseTorrentRemote",
     function(BaseTorrentRemote) {
 
-        var TransmissionRemote = function() {};
-        TransmissionRemote.extends(BaseTorrentRemote, {
-            dataClass: TransmissionData
-        });
+        var TransmissionRemote = function() {
+            BaseTorrentRemote.call(this);
+            this.dataClass = TransmissionData;
+        };
+        TransmissionRemote.extends(BaseTorrentRemote);
 
         return TransmissionRemote;
     }
@@ -45,8 +46,8 @@ DuckieTorrent.factory('TransmissionRemote', ["BaseTorrentRemote",
     function(BaseHTTPApi, $http) {
 
         var TransmissionAPI = function() {
+            BaseHTTPApi.call(this);
             this.sessionID = null;
-            this.constructor();
         };
         TransmissionAPI.extends(BaseHTTPApi, {
 
@@ -122,7 +123,7 @@ DuckieTorrent.factory('TransmissionRemote', ["BaseTorrentRemote",
     function(BaseTorrentClient, TransmissionRemote, TransmissionAPI) {
 
         var Transmission = function() {
-            this.constructor();
+            BaseTorrentClient.call(this);
         };
         Transmission.extends(BaseTorrentClient, {});
 

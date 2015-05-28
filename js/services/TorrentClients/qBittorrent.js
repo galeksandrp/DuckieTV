@@ -39,11 +39,10 @@ DuckieTorrent.factory('qBittorrentRemote', ["BaseTorrentRemote",
     function(BaseTorrentRemote) {
 
         var qBittorrentRemote = function() {
-            this.constructor();
+            BaseTorrentRemote.call(this);
+            this.dataClass = qBittorrentData;
         };
-        qBittorrentRemote.extends(BaseTorrentRemote, {
-            dataClass: qBittorrentData
-        });
+        qBittorrentRemote.extends(BaseTorrentRemote);
 
         return qBittorrentRemote;
     }
@@ -53,7 +52,7 @@ DuckieTorrent.factory('qBittorrentRemote', ["BaseTorrentRemote",
     function(BaseHTTPApi, $http) {
 
         var qBittorrentAPI = function() {
-            this.constructor();
+            BaseHTTPApi.call(this);
         };
         qBittorrentAPI.extends(BaseHTTPApi, {
             portscan: function() {
@@ -103,7 +102,7 @@ DuckieTorrent.factory('qBittorrentRemote', ["BaseTorrentRemote",
     function(BaseTorrentClient, qBittorrentRemote, qBittorrentAPI) {
 
         var qBittorrent = function() {
-            this.constructor();
+            BaseTorrentClient.call(this);
         };
         qBittorrent.extends(BaseTorrentClient, {});
 
