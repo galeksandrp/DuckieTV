@@ -5,9 +5,8 @@ DuckieTV
     function($rootScope) {
 
         function BaseTorrentRemote() {
-            console.log("Created object BaseTorrentRemote!", this);
-
-
+            this.torrents = {};
+            this.dataClass = null;
         }
 
         BaseTorrentRemote.prototype.handleEvent = function(data) {
@@ -25,8 +24,6 @@ DuckieTV
             $rootScope.$broadcast('torrent:update:', this.torrents[key]);
         };
 
-        BaseTorrentRemote.prototype.torrents = {};
-        BaseTorrentRemote.prototype.dataClass = null;
 
         BaseTorrentRemote.prototype.getTorrents = function() {
             return Object.keys(this.torrents).map(function(el) {
@@ -61,31 +58,34 @@ DuckieTV
     function($q, $http, URLBuilder, $parse, SettingsService) {
 
         var BaseTorrentClient = function() {
+            this.config = {
 
-            this.name = 'Base Torent Client';
-            this.remoteClass = null;
-            this.apiImplementation = null;
+            };
 
-        };
-
-        var methods = {
-
-            configMappings: {
+            this.configMappings = {
                 server: null,
                 port: null,
                 username: null,
                 password: null,
                 use_auth: null
-            },
+            };
 
-            isPolling: false,
-            isConnecting: false,
-            connected: false,
-            initialized: false,
+            this.name = 'Base Torrent Client';
+            this.remoteClass = null;
+            this.apiImplementation = null;
 
+            this.isPolling = false;
+            this.isConnecting = false;
+            this.connected = false;
+            this.initialized = false;
+
+
+        };
+
+        var methods = {
             setConfig: function(config) {
                 this.config = config;
-                this.apiClass.config = this.config;
+                this.apiImplementation.config = this.config;
             },
 
             saveConfig: function() {
@@ -95,8 +95,9 @@ DuckieTV
             },
             readConfig: function() {
                 Object.keys(this.configMappings).map(function(key) {
-                    this.apiImplementation.config[key] = SettingsService.get(this.configMappings[key]);
+                    this.apiImplementation.config[key] = this.config[key] = SettingsService.get(this.configMappings[key]);
                 }, this);
+                console.log("Config read: ", this.config);
             },
             setName: function(name) {
                 this.name = name;
@@ -183,7 +184,7 @@ DuckieTV
                         console.log(new Date().toString(), "Got torrents!, scheduling next loop", data);
                         if (undefined === dontLoop && self.isPolling && !data.error) {
                             setTimeout(function() {
-                                self.Update()
+                                self.Update();
                             }, 3000);
                         }
                     });
@@ -249,7 +250,7 @@ DuckieTV
                         });
                         return data;
                     }, function(error) {
-                        throw "Error executing Tixati getTorrents";
+                        throw "Error executing " + self.getName() + " getTorrents";
                     });
             },
             /**

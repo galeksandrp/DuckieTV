@@ -9,17 +9,14 @@ TixatiData.extends(TorrentData, {
     getName: function() {
         return this.name;
     },
-
     getProgress: function() {
         return parseInt(this.progres);
     },
-
     start: function() {
         var fd = new FormData();
         fd.append('start', 'Start');
         return this.getClient().getAPI().execute(this.guid, fd);
     },
-
     stop: function() {
         var fd = new FormData();
         fd.append('stop', 'Stop');
@@ -28,11 +25,9 @@ TixatiData.extends(TorrentData, {
     pause: function() {
         return this.stop();
     },
-
     isStarted: function() {
         return this.status.toLowerCase().indexOf('offline') == -1;
     },
-
     getFiles: function() {
         this.getClient().getAPI().getFiles(this.guid).then(function(data) {
             this.files = data;
@@ -44,13 +39,30 @@ TixatiData.extends(TorrentData, {
 DuckieTorrent
 
 
+/**
+ * Tixati remote singleton that receives the incoming data
+ */
+.factory('TixatiRemote', ["BaseTorrentRemote",
+    function(BaseTorrentRemote) {
+
+        var TixatiRemote = function() {};
+        TixatiRemote.extends(BaseTorrentRemote, {
+            dataClass: TixatiData
+        });
+
+        return TixatiRemote;
+    }
+])
+
 
 .factory('TixatiAPI', ['BaseHTTPApi',
     function(BaseHTTPApi) {
 
         var TixatiAPI = function() {
-
-            this.portscan = function() {
+            this.constructor();
+        };
+        TixatiAPI.extends(BaseHTTPApi, {
+            portscan: function() {
                 return this.request('portscan').then(function(result) {
                     var scraper = new HTMLScraper(result.data),
                         categories = {},
@@ -70,9 +82,9 @@ DuckieTorrent
 
                     return categories;
                 });
-            };
+            },
 
-            this.getTorrents = function() {
+            getTorrents: function() {
                 return this.request('torrents', {}).then(function(data) {
                     var scraper = new HTMLScraper(result.data);
 
@@ -104,18 +116,18 @@ DuckieTorrent
                     });
                     return torrents;
                 });
-            };
+            },
 
-            this.getInfoHash = function(guid) {
+            getInfoHash: function(guid) {
                 return this.request('infohash', guid).then(function(result) {
                     var magnet = result.data.match(/([0-9ABCDEFabcdef]{40})/);
                     if (magnet && magnet.length) {
                         return magnet[0].toUpperCase();
                     }
                 });
-            };
+            },
 
-            this.getFiles = function(guid) {
+            getFiles: function(guid) {
                 return this.request('files', guid).then(function(result) {
 
                     var scraper = new HTMLScraper(result.data);
@@ -134,10 +146,9 @@ DuckieTorrent
 
                 });
 
-            };
+            },
 
-
-            this.addMagnet = function(magnet) {
+            addMagnet: function(magnet) {
                 var fd = new FormData();
                 fd.append('addlinktext', magnet);
                 fd.append('addlink', 'Add');
@@ -148,22 +159,20 @@ DuckieTorrent
                         'Content-Type': undefined
                     }
                 });
-            };
+            },
 
-            this.execute = function(guid, formData) {
+            execute: function(guid, formData) {
                 return $http.post(this.getUrl('torrentcontrol', guid), formData, {
                     transformRequest: angular.identity,
                     headers: {
                         'Content-Type': undefined
                     }
                 });
-            };
+            }
 
-        };
-        TixatiAPI.prototype = Object.create(BaseHTTPApi.prototype);
-        TixatiAPI.prototype.constructor = BaseHTTPApi;
+        });
 
-        return new TixatiAPI();
+        return TixatiAPI;
     }
 ])
 
@@ -172,25 +181,21 @@ DuckieTorrent
     function(BaseTorrentClient, TixatiRemote, TixatiAPI) {
 
         var Tixati = function() {
-
+            this.constructor();
         };
-
-        Tixati.prototype = Object.create(BaseTorrentClient.prototype);
-        Tixati.prototype.constructor = BaseTorrentClient;
+        Tixati.extends(BaseTorrentClient);
 
         var service = new Tixati();
 
         service.setName('Tixati');
-        service.setRemote(TixatiRemote);
-        service.setAPI(TixatiAPI);
-
+        service.setAPI(new TixatiAPI());
+        service.setRemote(new TixatiRemote());
         service.setConfigMappings({
             server: 'tixati.server',
             port: 'tixati.port',
             username: 'tixati.username',
             password: 'tixati.password'
         });
-
         service.setEndpoints({
             torrents: '/transfers',
             portscan: '/home',
@@ -199,31 +204,10 @@ DuckieTorrent
             addmagnet: '/transfers/action',
             files: '/transfers/%s/files'
         });
-
         service.infohashCache = {};
         service.readConfig();
 
         return service;
-    }
-])
-
-
-/**
- * Tixati remote singleton that receives the incoming data
- */
-.factory('TixatiRemote', ["BaseTorrentRemote",
-    function(BaseTorrentRemote) {
-
-        var TixatiRemote = function() {
-
-        };
-
-        TixatiRemote.prototype = Object.create(BaseTorrentRemote.prototype);
-        TixatiRemote.prototype.constructor = BaseTorrentRemote;
-
-        TixatiRemote.dataClass = TixatiData;
-
-        return new TixatiRemote();
     }
 ])
 

@@ -1,18 +1,4 @@
 /**
- * First off, we allow for easy prototype extension.
- * to be able to define extended objects and add implementations to the prototype automatically
- */
-
-Function.prototype.extends = function(ParentClass, prototypeImplementations) {
-    this.prototype = new ParentClass();
-    // add all prototypeImplementations to the prototype chain for this function.
-    Object.keys(prototypeImplementations || {}).map(function(key) {
-        this[key] = prototypeImplementations[key];
-    }, this.prototype);
-    this.prototype.constructor = this;
-};
-
-/**
  * Base object for holding Torrent Data.
  * Individual clients extend this and implement the methods to adhere to the DuckieTorrent interface.
  */
@@ -100,46 +86,7 @@ TorrentData.prototype.isStarted = function() {
  * Client implementations
  */
 
-/**
- * qBittorrent
- * Works for both 3.2+ and below.
- */
-qBittorrentData = function(data) {
-    this.update(data);
-};
 
-qBittorrentData.extends(TorrentData, {
-    getName: function() {
-        return this.name;
-    },
-
-    getProgress: function() {
-        return this.round(this.percentDone * 100, 1);
-    },
-
-    start: function() {
-        DuckieTorrent.getClient().execute('resume', this.hash);
-
-    },
-
-    stop: function() {
-        this.pause();
-    },
-
-    pause: function() {
-        DuckieTorrent.getClient().execute('pause', this.hash);
-    },
-
-    getFiles: function() {
-        return DuckieTorrent.getClient().getFilesList(this.hash).then(function(results) {
-            this.files = results;
-        }.bind(this));
-    },
-
-    isStarted: function() {
-        return this.status > 0;
-    }
-});
 
 
 /**

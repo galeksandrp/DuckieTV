@@ -1,48 +1,20 @@
-var HTMLScraper = function(text) {
-
-    var parser = new DOMParser();
-    this.doc = parser.parseFromString(result.data, "text/html");
-
-    this.walkSelector = function(selector, callback) {
-        return this.walkNodes(this.querySelectorAll(selector), callback);
-    };
-
-    this.querySelector = function(selector) {
-        return this.doc.querySelector(selector);
-    };
-
-    this.querySelectorAll = function(selector) {
-        return this.doc.querySelectorAll(selector);
-    };
-
-    this.walkNodes = function(nodes, callback) {
-        return Array.prototype.map.call(nodes, callback);
-    };
-
-    return this;
-};
-
 DuckieTV.factory('BaseHTTPApi', ["$http",
     function($http) {
 
         var BaseHTTPApi = function() {
+            this.config = {
+                server: null,
+                port: null,
+                username: null,
+                use_auth: null
+            };
 
+            this.endpoints = {
+                torrents: null,
+                portscan: null,
+                addmagnet: null
+            };
         };
-
-        BaseHTTPApi.prototype.config = {
-            server: null,
-            port: null,
-            username: null,
-            use_auth: null
-        };
-
-        BaseHTTPApi.prototype.endpoints = {
-            torrents: null,
-            portscan: null,
-            addmagnet: null
-        };
-
-
 
         /**
          * Fetches the url, auto-replaces the port in the url if it was found.
