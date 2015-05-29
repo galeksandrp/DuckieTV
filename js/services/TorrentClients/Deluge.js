@@ -25,7 +25,12 @@ DelugeData.extends(TorrentData, {
         return ["Downloading", "Seeding", "Active"].indexOf(this.status) > -1;
     },
     getFiles: function() {
-        return this.files_tree;
+        if (!this.files) {
+            this.files = [];
+        }
+        this.getClient().getAPI().getFiles(this.hash).then(function(result) {
+            this.files = result;
+        }.bind(this));
     }
 });
 
@@ -89,13 +94,42 @@ DuckieTorrent.factory('DelugeRemote', ["BaseTorrentRemote",
                     return output;
                 });
             },
-            addMagnet: function(magnetHash) {
-                return this.rpc('torrent-add', {
-                    "arguments": {
-                        "paused": false,
-                        "filename": magnetHash
+            getFiles: function(magnetHash) {
+
+                function flattenFiles(object, output) {
+                    if (!output) {
+                        output = [];
+                    }
+                    if (object.type == "dir") {
+                        Object.keys(object.contents).map(function(key) {
+                            return flattenFiles(object.contents[key], output);
+                        });
+                    } else {
+                        if (object.path) {
+                            output.push({
+                                name: object.path
+                            });
+                        }
+                    }
+                    return output;
+                }
+                return this.rpc("web.get_torrent_files", [magnetHash]).then(function(response) {
+                    if (response.result) {
+                        return flattenFiles(response.result);
+                    } else {
+                        return [];
                     }
                 });
+            },
+            addMagnet: function(magnetHash) {
+
+
+                return this.rpc('web.add_torrents', [
+                    [{
+                        options: {},
+                        path: magnetHash
+                    }]
+                ]);
             },
             execute: function(method, args) {
                 return this.rpc(method, [args]);
