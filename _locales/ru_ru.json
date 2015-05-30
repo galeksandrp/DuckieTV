@@ -487,6 +487,8 @@
     "SUBTITLEDIALOG/searching-please-wait/lbl": ", Пожалуйста, подождите. ",
     "SUBTITLEDIALOG/searching/lbl": "поиск ",
     "SUBTITLEDIALOG/title/lbl": "название ",
+    "SUBTITLEDIALOGjs/find-subtitle-for/tooltip": "Найти субтитров для ",
+    "SUBTITLEDIALOGjs/find-subtitle/tooltip": "Найти субтитров",
     "TAB/about/glyph": "О DuckieTV ",
     "TAB/calendar/glyph": "календарь ",
     "TAB/close/glyph": "близко",

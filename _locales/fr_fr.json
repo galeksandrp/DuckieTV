@@ -487,6 +487,8 @@
     "SUBTITLEDIALOG/searching-please-wait/lbl": ", S'il vous plaît, attendez. ",
     "SUBTITLEDIALOG/searching/lbl": "recherche ",
     "SUBTITLEDIALOG/title/lbl": "titre ",
+    "SUBTITLEDIALOGjs/find-subtitle-for/tooltip": "Trouver un sous-titre ",
+    "SUBTITLEDIALOGjs/find-subtitle/tooltip": "Trouver un sous-titre",
     "TAB/about/glyph": "À propos de DuckieTV ",
     "TAB/calendar/glyph": "calendrier ",
     "TAB/close/glyph": "Fermer",

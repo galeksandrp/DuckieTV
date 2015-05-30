@@ -487,6 +487,8 @@
     "SUBTITLEDIALOG/searching-please-wait/lbl": "잠시 기다려주십시오. ",
     "SUBTITLEDIALOG/searching/lbl": "수색 ",
     "SUBTITLEDIALOG/title/lbl": "표제 ",
+    "SUBTITLEDIALOGjs/find-subtitle-for/tooltip": "에 대한 자막 찾기 ",
+    "SUBTITLEDIALOGjs/find-subtitle/tooltip": "자막 찾기",
     "TAB/about/glyph": "DuckieTV 소개 ",
     "TAB/calendar/glyph": "달력 ",
     "TAB/close/glyph": "가까운",

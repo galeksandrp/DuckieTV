@@ -487,6 +487,8 @@
     "SUBTITLEDIALOG/searching-please-wait/lbl": ",お待ちください. ",
     "SUBTITLEDIALOG/searching/lbl": "検索 ",
     "SUBTITLEDIALOG/title/lbl": "タイトル ",
+    "SUBTITLEDIALOGjs/find-subtitle-for/tooltip": "のための字幕を探します ",
+    "SUBTITLEDIALOGjs/find-subtitle/tooltip": "字幕を探します",
     "TAB/about/glyph": "DuckieTVについて ",
     "TAB/calendar/glyph": "カレンダー ",
     "TAB/close/glyph": "クローズ",

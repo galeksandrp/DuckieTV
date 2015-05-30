@@ -487,6 +487,8 @@
     "SUBTITLEDIALOG/searching-please-wait/lbl": ",请耐心等待. ",
     "SUBTITLEDIALOG/searching/lbl": "搜索 ",
     "SUBTITLEDIALOG/title/lbl": "标题 ",
+    "SUBTITLEDIALOGjs/find-subtitle-for/tooltip": "查找的字幕 ",
+    "SUBTITLEDIALOGjs/find-subtitle/tooltip": "查找字幕",
     "TAB/about/glyph": "关于DuckieTV ",
     "TAB/calendar/glyph": "日历 ",
     "TAB/close/glyph": "近",

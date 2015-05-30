@@ -487,6 +487,8 @@
     "SUBTITLEDIALOG/searching-please-wait/lbl": ", Var god vänta. ",
     "SUBTITLEDIALOG/searching/lbl": "söka ",
     "SUBTITLEDIALOG/title/lbl": "Titel ",
+    "SUBTITLEDIALOGjs/find-subtitle-for/tooltip": "Hitta en undertext för ",
+    "SUBTITLEDIALOGjs/find-subtitle/tooltip": "Hitta en undertext",
     "TAB/about/glyph": "Om DuckieTV ",
     "TAB/calendar/glyph": "Kalender ",
     "TAB/close/glyph": "Stäng",
