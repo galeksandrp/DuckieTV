@@ -1,20 +1,26 @@
 {
-    "appNameNewTab": {
-        "message": "Режим 'Новая вкладка' - DuckieTV "
-    },
-    "appShortNameNewTab": {
-        "message": "DuckieTV "
-    },
-    "appDescNewTab": {
-        "message": "Все, что вы должны знать, когда вы приходите любимый международного сериал на "
-    },
-    "appNameBrowserAction": {
-        "message": "DuckieTV - Кнопка Браузер режим"
-    },
-    "appShortNameBrowserAction": {
-        "message": "DuckieTV "
-    },
-    "appDescBrowserAction": {
-        "message": "Все, что вы должны знать, когда вы приходите любимый международного сериал на"
-    }
+  "appNameNewTab": {
+    "message": "DuckieTV - режим 'Новая вкладка'",
+    "description": "Название приложения 'Новая вкладка', отображаемое в интернет-магазине."
+  },
+  "appShortNameNewTab": {
+    "message": "DuckieTV",
+    "description": "Короткое название приложения 'Новая вкладка' для поиска."
+  },
+  "appDescNewTab": {
+    "message": "Управляйте любимыми сериалами и фильмами из новой вкладки браузера",
+    "description": "Тэглайн в интернет-магазине для версии 'Новая вкладка'."
+  },
+  "appNameBrowserAction": {
+    "message": "DuckieTV - режим 'Кнопка'",
+    "description": "Название приложения 'Кнопка', отображаемое в интернет-магазине."
+  },
+  "appShortNameBrowserAction": {
+    "message": "DuckieTV",
+    "description": "Короткое название приложения 'Кнопка' для поиска."
+  },
+  "appDescBrowserAction": {
+    "message": "Управляйте любимыми сериалами и фильмами из браузера одним нажатием кнопки",
+    "description": "Тэглайн в интернет-магазине для версии 'Кнопка'."
+  }
 }
